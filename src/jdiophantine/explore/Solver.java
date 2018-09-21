@@ -3,6 +3,20 @@ package jdiophantine.explore;
 import java.math.BigInteger;
 import java.util.TreeMap;
 
+/**
+ * Base abstract class to deal with Diophantine equations of the form:<br />
+ * &nbsp;&nbsp;&nbsp;Ax^n + B = Cy^m + D<br />
+ * &nbsp;&nbsp;&nbsp;with A,B,C,D,n,m all integers and A,C,n,m > 0<br /><br />
+ * n and m are expected relatively small (they are stored as int values),
+ * while A,B,C,D have no limit (they are stored as BigInteger).<br />
+ * Only some common helping methods are implemented here (print the
+ * equations, compute the left and right part of the equation given x or y,
+ * etc.). It's up to a subclass to implement the "solve" method and any
+ * other needed method.
+ *
+ * @author dtagliabue
+ *
+ */
 public abstract class Solver {
 	public static final BigInteger TWO = BigInteger.ONE.add(BigInteger.ONE);
 
@@ -115,5 +129,29 @@ public abstract class Solver {
 		return y.pow(rPow).multiply(rMult).add(rAdd);
 	}
 	
+	/**
+	 * Given Ax + B = Cy + D, check if gcd(A,C)|(B-D)<br />
+	 * (otherwise the equation cannot have any solution because of Bezout's identity)
+	 * 
+	 * @return true if the gcd divides B-D
+	 */
+	public boolean checkGCD( ) {
+		BigInteger gcd = lMult.gcd(rMult);
+		BigInteger k = lAdd.subtract(rAdd);
+		boolean hasSolution = (k.mod(gcd) == BigInteger.ZERO);
+
+		if (verbose && !hasSolution) {
+			System.out.println("  No solutions by Bezout's identity");
+		}
+
+		return hasSolution;
+	}
+	
+	/**
+	 * Abstract method to be implemented in subclasses, with some algorithm
+	 * to solve the Diophantine equation
+	 * 
+	 * @return true if at least a solution is found
+	 */
 	public abstract boolean solve( );
 }
